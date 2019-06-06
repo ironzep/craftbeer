@@ -3,6 +3,7 @@ package com.beerhouse.controllers;
 import com.beerhouse.controllers.BeerController;
 import com.beerhouse.models.Beer;
 import com.beerhouse.repositories.BeerRepository;
+import com.beerhouse.services.BeerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,12 +32,15 @@ public class BeerControllerTest {
     private MockMvc mockMvc;
 
     @MockBean
+    private BeerService beerService;
+
+    @MockBean
     private BeerRepository beerRepository;
 
     @Test
     public void getByIdTest() throws Exception {
         String uri = "/beers/1";
-        Mockito.when(beerRepository.findOne(1l)).thenReturn(new Beer());
+        Mockito.when(beerService.getBeerById(1l)).thenReturn(new Beer("Colonial", "Água, Malte e Lúpulo", "6%", 15, "IPA"));
         RequestBuilder requestBuilder = MockMvcRequestBuilders.get(uri).accept(MediaType.APPLICATION_JSON_VALUE);
 
         MvcResult result = mockMvc.perform(requestBuilder).andReturn();
@@ -48,7 +52,7 @@ public class BeerControllerTest {
     }
 
     @Test
-    public void createBeerTest() throws Exception{
+    public void postBeerTest() throws Exception{
         String uri = "/beers";
         Beer mockBeer = new Beer("Colorado", "as", "asd", 1, "as");
 
@@ -65,5 +69,27 @@ public class BeerControllerTest {
 
         assertEquals(201, status);
     }
+
+    @Test
+    public void putBeerTest() throws Exception {
+        String uri = "/beers/1";
+
+        Beer mockBeer = new Beer("Colorado", "as", "asd", 1, "as");
+
+        String inputJson = objectMapper.writeValueAsString(mockBeer);
+
+        RequestBuilder requestBuilder = MockMvcRequestBuilders.put(uri)
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .content(inputJson);
+
+        MvcResult mvcResult = mockMvc.perform(requestBuilder).andReturn();
+
+        int status = mvcResult.getResponse().getStatus();
+        assertEquals(200, status);
+
+    }
+
+
+
 
 }
